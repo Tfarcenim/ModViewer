@@ -13,20 +13,20 @@ import com.replaymod.lib.de.johni0702.minecraft.gui.utils.lwjgl.ReadablePoint;
 import java.util.function.Consumer;
 
 public class GuiYesNoPopup extends AbstractGuiPopup<GuiYesNoPopup> implements Typeable {
-   private Consumer<Boolean> onClosed = (accepted) -> {
+   private Consumer<Boolean> onClosed = accepted -> {
    };
    private Runnable onAccept = () -> {
    };
    private Runnable onReject = () -> {
    };
-   private final GuiButton yesButton = (GuiButton)((GuiButton)(new GuiButton()).setSize(150, 20)).onClick(new Runnable() {
+   private final GuiButton yesButton = new GuiButton().setSize(150, 20).onClick(new Runnable() {
       public void run() {
          GuiYesNoPopup.this.close();
          GuiYesNoPopup.this.onAccept.run();
          GuiYesNoPopup.this.onClosed.accept(true);
       }
    });
-   private final GuiButton noButton = (GuiButton)((GuiButton)(new GuiButton()).setSize(150, 20)).onClick(new Runnable() {
+   private final GuiButton noButton = new GuiButton().setSize(150, 20).onClick(new Runnable() {
       public void run() {
          GuiYesNoPopup.this.close();
          GuiYesNoPopup.this.onReject.run();
@@ -38,7 +38,7 @@ public class GuiYesNoPopup extends AbstractGuiPopup<GuiYesNoPopup> implements Ty
    private int layer;
 
    public static GuiYesNoPopup open(GuiContainer container, GuiElement... info) {
-      GuiYesNoPopup popup = (GuiYesNoPopup)(new GuiYesNoPopup(container)).setBackgroundColor(Colors.DARK_TRANSPARENT);
+      GuiYesNoPopup popup = new GuiYesNoPopup(container).setBackgroundColor(Colors.DARK_TRANSPARENT);
       popup.getInfo().addElements(new VerticalLayout.Data(0.5D), info);
       popup.open();
       return popup;
@@ -46,9 +46,9 @@ public class GuiYesNoPopup extends AbstractGuiPopup<GuiYesNoPopup> implements Ty
 
    public GuiYesNoPopup(GuiContainer container) {
       super(container);
-      this.info = (GuiPanel)((GuiPanel)(new GuiPanel()).setMinSize(new Dimension(320, 50))).setLayout((new VerticalLayout(VerticalLayout.Alignment.TOP)).setSpacing(2));
-      this.buttons = (GuiPanel)((GuiPanel)(new GuiPanel()).setLayout((new HorizontalLayout(HorizontalLayout.Alignment.CENTER)).setSpacing(5))).addElements(new HorizontalLayout.Data(0.5D), new GuiElement[]{this.yesButton, this.noButton});
-      ((GuiPanel)this.popup.setLayout((new VerticalLayout()).setSpacing(10))).addElements(new VerticalLayout.Data(0.5D), new GuiElement[]{this.info, this.buttons});
+      this.info = new GuiPanel().setMinSize(new Dimension(320, 50)).setLayout(new VerticalLayout(VerticalLayout.Alignment.TOP).setSpacing(2));
+      this.buttons = new GuiPanel().setLayout(new HorizontalLayout(HorizontalLayout.Alignment.CENTER).setSpacing(5)).addElements(new HorizontalLayout.Data(0.5D), new GuiElement[]{this.yesButton, this.noButton});
+      this.popup.setLayout(new VerticalLayout().setSpacing(10)).addElements(new VerticalLayout.Data(0.5D), this.info, this.buttons);
    }
 
    public GuiYesNoPopup setYesLabel(String label) {

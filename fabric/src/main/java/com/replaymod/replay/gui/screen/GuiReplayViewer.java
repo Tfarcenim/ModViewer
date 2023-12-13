@@ -111,7 +111,7 @@ public class GuiReplayViewer extends GuiScreen {
          }
 
       }
-   }).setSize(150, 20).setI18nLabel("replaymod.gui.viewer.replayfolder", new Object[0]);
+   }).setSize(150, 20).setI18nLabel("replaymod.gui.viewer.replayfolder");
    public final GuiButton renameButton = new GuiButton().onClick(new Runnable() {
       public void run() {
          Path path = GuiReplayViewer.this.list.getSelected().get(0).file.toPath();
@@ -190,13 +190,13 @@ public class GuiReplayViewer extends GuiScreen {
          public void run() {
             GuiReplayViewer.this.getMinecraft().setScreen(null);
          }
-      }).setSize(73, 20).setI18nLabel("replaymod.gui.cancel", new Object[0]);
-      this.replaySpecificButtons = new ArrayList();
-      this.replaySpecificButtons.addAll(Collections.singletonList(this.renameButton));
+      }).setSize(73, 20).setI18nLabel("replaymod.gui.cancel");
+      this.replaySpecificButtons = new ArrayList<>();
+      this.replaySpecificButtons.add(this.renameButton);
       this.editorButton = new GuiPanel();
-      this.upperButtonPanel = new GuiPanel().setLayout(new HorizontalLayout().setSpacing(5)).addElements(null, new GuiElement[]{this.loadButton});
-      this.lowerButtonPanel = new GuiPanel().setLayout(new HorizontalLayout().setSpacing(5)).addElements(null, new GuiElement[]{this.renameButton, this.deleteButton, this.editorButton, this.cancelButton});
-      this.buttonPanel = new GuiPanel(this).setLayout(new VerticalLayout().setSpacing(5)).addElements(null, new GuiElement[]{this.upperButtonPanel, this.lowerButtonPanel});
+      this.upperButtonPanel = new GuiPanel().setLayout(new HorizontalLayout().setSpacing(5)).addElements(null, this.loadButton);
+      this.lowerButtonPanel = new GuiPanel().setLayout(new HorizontalLayout().setSpacing(5)).addElements(null, this.renameButton, this.deleteButton, this.editorButton, this.cancelButton);
+      this.buttonPanel = new GuiPanel(this).setLayout(new VerticalLayout().setSpacing(5)).addElements(null, this.upperButtonPanel, this.lowerButtonPanel);
       this.mod = mod;
 
       try {
@@ -205,7 +205,7 @@ public class GuiReplayViewer extends GuiScreen {
          throw new ReportedException(CrashReport.forThrowable(var3, "Getting replay folder"));
       }
 
-      this.setTitle(new GuiLabel().setI18nText("replaymod.gui.replayviewer", new Object[0]));
+      this.setTitle(new GuiLabel().setI18nText("replaymod.gui.replayviewer"));
       this.setLayout(new CustomLayout<GuiScreen>() {
          protected void layout(GuiScreen container, int width, int height) {
             this.pos(GuiReplayViewer.this.buttonPanel, width / 2 - this.width(GuiReplayViewer.this.buttonPanel) / 2, height - 10 - this.height(GuiReplayViewer.this.buttonPanel));
@@ -282,7 +282,7 @@ public class GuiReplayViewer extends GuiScreen {
                      ReplayFile replayFile = ReplayMod.instance.files.open(file.toPath());
 
                      try {
-                        Image thumb = (Image)Optional.ofNullable(replayFile.getThumbBytes().orNull()).flatMap(stream -> {
+                        Image thumb = Optional.ofNullable(replayFile.getThumbBytes().orNull()).flatMap(stream -> {
                            try {
                               InputStream in = stream;
 
@@ -427,7 +427,7 @@ public class GuiReplayViewer extends GuiScreen {
       public GuiReplayEntry(File file, ReplayMetaData metaData, Image thumbImage, List<RenderJob> renderQueue) {
          this.server = new GuiLabel().setColor(Colors.LIGHT_GRAY);
          this.date = new GuiLabel().setColor(Colors.LIGHT_GRAY);
-         this.infoPanel = new GuiPanel(this).setLayout(new VerticalLayout().setSpacing(2)).addElements(null, new GuiElement[]{this.name, this.server, this.date});
+         this.infoPanel = new GuiPanel(this).setLayout(new VerticalLayout().setSpacing(2)).addElements(null, this.name, this.server, this.date);
          this.version = new GuiLabel(this).setColor(Colors.RED);
          this.duration = new GuiLabel();
          this.durationPanel = new GuiPanel().setBackgroundColor(Colors.HALF_TRANSPARENT).addElements(null, new GuiElement[]{this.duration}).setLayout(new CustomLayout<GuiPanel>() {

@@ -31,19 +31,19 @@ public class GuiUploadScreenshot extends AbstractGuiPopup<GuiUploadScreenshot> {
 
    public GuiUploadScreenshot(GuiContainer container, ReplayMod mod, RenderSettings renderSettings) {
       super(container);
-      this.successLabel = (GuiLabel)((GuiLabel)(new GuiLabel()).setI18nText("replaymod.gui.advancedscreenshots.finished.description", new Object[0])).setColor(ReadableColor.BLACK);
-      this.veerLabel = (GuiLabel)((GuiLabel)(new GuiLabel()).setI18nText("replaymod.gui.advancedscreenshots.finished.description.veer", new Object[0])).setColor(ReadableColor.BLACK);
-      this.veerUploadButton = (GuiButton)((GuiButton)(new GuiButton()).setSize(150, 20)).setI18nLabel("replaymod.gui.advancedscreenshots.finished.upload.veer", new Object[0]);
-      this.showOnDiskButton = (GuiButton)((GuiButton)(new GuiButton()).setSize(150, 20)).setI18nLabel("replaymod.gui.advancedscreenshots.finished.showfile", new Object[0]);
-      this.closeButton = (GuiButton)((GuiButton)(new GuiButton()).setSize(150, 20)).setI18nLabel("replaymod.gui.close", new Object[0]);
+      this.successLabel = new GuiLabel().setI18nText("replaymod.gui.advancedscreenshots.finished.description", new Object[0]).setColor(ReadableColor.BLACK);
+      this.veerLabel = new GuiLabel().setI18nText("replaymod.gui.advancedscreenshots.finished.description.veer", new Object[0]).setColor(ReadableColor.BLACK);
+      this.veerUploadButton = new GuiButton().setSize(150, 20).setI18nLabel("replaymod.gui.advancedscreenshots.finished.upload.veer");
+      this.showOnDiskButton = new GuiButton().setSize(150, 20).setI18nLabel("replaymod.gui.advancedscreenshots.finished.showfile");
+      this.closeButton = new GuiButton().setSize(150, 20).setI18nLabel("replaymod.gui.close");
       this.neverOpenCheckbox = new GuiCheckbox();
-      this.neverOpenLabel = (GuiLabel)((GuiLabel)(new GuiLabel()).setI18nText("replaymod.gui.notagain", new Object[0])).setColor(ReadableColor.BLACK);
-      this.checkboxPanel = GuiPanel.builder().layout((new HorizontalLayout(HorizontalLayout.Alignment.RIGHT)).setSpacing(5)).with(this.neverOpenCheckbox, new HorizontalLayout.Data(0.5D)).with(this.neverOpenLabel, new HorizontalLayout.Data(0.5D)).build();
+      this.neverOpenLabel = new GuiLabel().setI18nText("replaymod.gui.notagain", new Object[0]).setColor(ReadableColor.BLACK);
+      this.checkboxPanel = GuiPanel.builder().layout(new HorizontalLayout(HorizontalLayout.Alignment.RIGHT).setSpacing(5)).with(this.neverOpenCheckbox, new HorizontalLayout.Data(0.5D)).with(this.neverOpenLabel, new HorizontalLayout.Data(0.5D)).build();
       this.mod = mod;
       this.renderSettings = renderSettings;
       boolean veer = renderSettings.getRenderMethod() == RenderSettings.RenderMethod.EQUIRECTANGULAR;
       if (renderSettings.getRenderMethod() == RenderSettings.RenderMethod.EQUIRECTANGULAR) {
-         this.successLabel.setI18nText("replaymod.gui.advancedscreenshots.finished.description.360", new Object[0]);
+         this.successLabel.setI18nText("replaymod.gui.advancedscreenshots.finished.description.360");
       }
 
       if (veer) {
@@ -64,14 +64,14 @@ public class GuiUploadScreenshot extends AbstractGuiPopup<GuiUploadScreenshot> {
 
          this.close();
       });
-      this.popup.addElements(new VerticalLayout.Data(0.5D), new GuiElement[]{this.successLabel});
+      this.popup.addElements(new VerticalLayout.Data(0.5D), this.successLabel);
       if (veer) {
-         this.popup.addElements(new VerticalLayout.Data(0.5D), new GuiElement[]{this.veerLabel, this.veerUploadButton});
+         this.popup.addElements(new VerticalLayout.Data(0.5D), this.veerLabel, this.veerUploadButton);
       }
 
-      this.popup.addElements(new VerticalLayout.Data(0.5D), new GuiElement[]{this.successLabel, this.showOnDiskButton, this.closeButton});
-      this.popup.addElements(new VerticalLayout.Data(1.0D), new GuiElement[]{this.checkboxPanel});
-      this.popup.setLayout((new VerticalLayout()).setSpacing(5));
+      this.popup.addElements(new VerticalLayout.Data(0.5D), this.successLabel, this.showOnDiskButton, this.closeButton);
+      this.popup.addElements(new VerticalLayout.Data(1.0D), this.checkboxPanel);
+      this.popup.setLayout(new VerticalLayout().setSpacing(5));
    }
 
    protected void open() {

@@ -44,9 +44,9 @@ public class HotkeyButtons extends EventRegistrations implements Extra {
       private boolean open;
 
       public Gui(ReplayMod mod, GuiReplayOverlay overlay) {
-         this.toggleButton = (GuiButton)((GuiButton)((GuiButton)((GuiButton)(new GuiButton(overlay)).setSize(20, 20)).setTexture(ReplayMod.TEXTURE, 256)).setSpriteUV(0, 120)).onClick(new Runnable() {
+         this.toggleButton = (new GuiButton(overlay)).setSize(20, 20).setTexture(ReplayMod.TEXTURE, 256).setSpriteUV(0, 120).onClick(new Runnable() {
             // $FF: synthetic field
-            final HotkeyButtons.Gui this$0;
+            final Gui this$0;
 
             {
                this.this$0 = this$0;
@@ -56,9 +56,9 @@ public class HotkeyButtons extends EventRegistrations implements Extra {
                this.this$0.open = !this.this$0.open;
             }
          });
-         this.panel = (GuiPanel)(new GuiPanel(overlay) {
+         this.panel = (new GuiPanel(overlay) {
             // $FF: synthetic field
-            final HotkeyButtons.Gui this$0;
+            final Gui this$0;
 
             {
                super(container);
@@ -66,7 +66,7 @@ public class HotkeyButtons extends EventRegistrations implements Extra {
             }
 
             public Collection<GuiElement> getChildren() {
-               return (Collection)(this.this$0.open ? super.getChildren() : Collections.emptyList());
+               return this.this$0.open ? super.getChildren() : Collections.emptyList();
             }
 
             public Map<GuiElement, LayoutData> getElements() {
@@ -75,13 +75,13 @@ public class HotkeyButtons extends EventRegistrations implements Extra {
          }).setLayout(this.panelLayout = (new GridLayout()).setSpacingX(5).setSpacingY(5).setColumns(1));
          KeyBindingRegistry keyBindingRegistry = mod.getKeyBindingRegistry();
          keyBindingRegistry.getBindings().values().stream().sorted(Comparator.comparing((it) -> {
-            return I18n.get(it.name, new Object[0]);
+            return I18n.get(it.name);
          })).forEachOrdered((keyBinding) -> {
-            GuiButton button = (GuiButton)(new GuiButton(keyBinding) {
+            GuiButton button = (new GuiButton(keyBinding) {
                // $FF: synthetic field
                final KeyBindingRegistry.Binding val$keyBinding;
                // $FF: synthetic field
-               final HotkeyButtons.Gui this$0;
+               final Gui this$0;
 
                {
                   this.this$0 = this$0;
@@ -92,9 +92,9 @@ public class HotkeyButtons extends EventRegistrations implements Extra {
                   this.setLabel(this.val$keyBinding.isBound() ? this.val$keyBinding.getBoundKey() : "");
                   if (this.val$keyBinding.supportsAutoActivation()) {
                      GuiTooltip var10001 = new GuiTooltip();
-                     String[] var10002 = new String[]{I18n.get("replaymod.gui.ingame.autoactivating", new Object[0]), null};
+                     String[] var10002 = new String[]{I18n.get("replaymod.gui.ingame.autoactivating"), null};
                      String var10005 = this.val$keyBinding.isAutoActivating() ? "disable" : "enable";
-                     var10002[1] = I18n.get("replaymod.gui.ingame.autoactivating." + var10005, new Object[0]);
+                     var10002[1] = I18n.get("replaymod.gui.ingame.autoactivating." + var10005);
                      this.setTooltip(var10001.setText(var10002));
                      this.setLabelColor(this.val$keyBinding.isAutoActivating() ? '\uff00' : 14737632);
                   }
@@ -109,14 +109,14 @@ public class HotkeyButtons extends EventRegistrations implements Extra {
                }
 
             });
-            GuiLabel label = (GuiLabel)(new GuiLabel()).setI18nText(keyBinding.name, new Object[0]);
-            this.panel.addElements((LayoutData)null, new GuiElement[]{((GuiPanel)((GuiPanel)(new GuiPanel()).setLayout(new CustomLayout<GuiPanel>(button, label) {
+            GuiLabel label = (new GuiLabel()).setI18nText(keyBinding.name, new Object[0]);
+            this.panel.addElements(null, (new GuiPanel()).setLayout(new CustomLayout<GuiPanel>(button, label) {
                // $FF: synthetic field
                final GuiButton val$button;
                // $FF: synthetic field
                final GuiLabel val$label;
                // $FF: synthetic field
-               final HotkeyButtons.Gui this$0;
+               final Gui this$0;
 
                {
                   this.this$0 = this$0;
@@ -136,7 +136,7 @@ public class HotkeyButtons extends EventRegistrations implements Extra {
 
                   this.y(this.val$label, (height - this.height(this.val$label)) / 2);
                }
-            })).addElements((LayoutData)null, new GuiElement[]{button, label})).setSize(150, 20)});
+            }).addElements(null, new GuiElement[]{button, label}).setSize(150, 20));
          });
          overlay.setLayout(new CustomLayout<GuiReplayOverlay>(overlay.getLayout()) {
             // $FF: synthetic field
