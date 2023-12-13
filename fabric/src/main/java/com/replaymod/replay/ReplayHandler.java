@@ -170,11 +170,9 @@ public class ReplayHandler {
                public void onFailure(@Nonnull Throwable t) {
                   String message = "Failed to initialize quick mode. It will not be available.";
                   Logger var10000 = ReplayModReplay.LOGGER;
-                  GuiReplayOverlay var10001 = ReplayHandler.this.overlay;
                   CrashReport var10002 = CrashReport.forThrowable(t, message);
-                  ReplayHandler.InitializingQuickModePopup var10003 = popup;
-                  Objects.requireNonNull(var10003);
-                  Utils.error(var10000, var10001, var10002, var10003::close);
+                  Objects.requireNonNull(popup);
+                  Utils.error(var10000, ReplayHandler.this.overlay, var10002, popup::close);
                }
             }, Runnable::run);
          }

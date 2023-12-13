@@ -33,7 +33,7 @@ import org.apache.logging.log4j.Logger;
 
 public class ReplayModReplay implements Module {
    public static ReplayModReplay instance;
-   private ReplayMod core;
+   private final ReplayMod core;
    public KeyBindingRegistry.Binding keyPlayPause;
    private final CameraControllerRegistry cameraControllerRegistry;
    public static Logger LOGGER = LogManager.getLogger();
@@ -89,7 +89,7 @@ public class ReplayModReplay implements Module {
                         BufferedImage image = result.getImage().toBufferedImage();
                         BufferedImage bgrImage = new BufferedImage(image.getWidth(), image.getHeight(), 5);
                         Graphics graphics = bgrImage.getGraphics();
-                        graphics.drawImage(image, 0, 0, (ImageObserver)null);
+                        graphics.drawImage(image, 0, 0, null);
                         graphics.dispose();
                         this.this$1.this$0.replayHandler.getReplayFile().writeThumb(bgrImage);
                         this.this$1.this$0.core.printInfoToChat("replaymod.chat.savedthumb");
@@ -198,7 +198,7 @@ public class ReplayModReplay implements Module {
    }
 
    public CameraController createCameraController(CameraEntity cameraEntity) {
-      String controllerName = (String)this.core.getSettingsRegistry().get(Setting.CAMERA);
+      String controllerName = this.core.getSettingsRegistry().get(Setting.CAMERA);
       return this.cameraControllerRegistry.create(controllerName, cameraEntity);
    }
 }
