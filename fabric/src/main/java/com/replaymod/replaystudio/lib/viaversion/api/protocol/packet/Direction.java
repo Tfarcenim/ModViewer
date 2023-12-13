@@ -1,0 +1,6 @@
+package com.replaymod.replaystudio.lib.viaversion.api.protocol.packet;
+
+public enum Direction {
+   CLIENTBOUND,
+   SERVERBOUND;
+}

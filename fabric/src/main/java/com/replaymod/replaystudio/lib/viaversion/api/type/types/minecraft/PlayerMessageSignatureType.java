@@ -1,0 +1,28 @@
+package com.replaymod.replaystudio.lib.viaversion.api.type.types.minecraft;
+
+import com.replaymod.replaystudio.lib.viaversion.api.minecraft.PlayerMessageSignature;
+import com.replaymod.replaystudio.lib.viaversion.api.type.OptionalType;
+import com.replaymod.replaystudio.lib.viaversion.api.type.Type;
+import io.netty.buffer.ByteBuf;
+import java.util.UUID;
+
+public class PlayerMessageSignatureType extends Type<PlayerMessageSignature> {
+   public PlayerMessageSignatureType() {
+      super(PlayerMessageSignature.class);
+   }
+
+   public PlayerMessageSignature read(ByteBuf buffer) throws Exception {
+      return new PlayerMessageSignature((UUID)Type.UUID.read(buffer), (byte[])Type.BYTE_ARRAY_PRIMITIVE.read(buffer));
+   }
+
+   public void write(ByteBuf buffer, PlayerMessageSignature value) throws Exception {
+      Type.UUID.write(buffer, value.uuid());
+      Type.BYTE_ARRAY_PRIMITIVE.write(buffer, value.signatureBytes());
+   }
+
+   public static final class OptionalPlayerMessageSignatureType extends OptionalType<PlayerMessageSignature> {
+      public OptionalPlayerMessageSignatureType() {
+         super(Type.PLAYER_MESSAGE_SIGNATURE);
+      }
+   }
+}
