@@ -100,7 +100,7 @@ public class QuickReplaySender extends ChannelHandlerAdapter implements ReplaySe
             }
 
             this.mod.getCore().runLaterWithoutLock(() -> {
-               promise.set((Object)null);
+               promise.set(null);
             });
          })).start();
          return promise;

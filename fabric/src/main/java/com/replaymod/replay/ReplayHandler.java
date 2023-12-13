@@ -18,7 +18,6 @@ import com.replaymod.core.versions.MCVer;
 import com.replaymod.lib.de.johni0702.minecraft.gui.container.AbstractGuiScreen;
 import com.replaymod.lib.de.johni0702.minecraft.gui.container.GuiContainer;
 import com.replaymod.lib.de.johni0702.minecraft.gui.container.GuiScreen;
-import com.replaymod.lib.de.johni0702.minecraft.gui.element.GuiElement;
 import com.replaymod.lib.de.johni0702.minecraft.gui.element.GuiLabel;
 import com.replaymod.lib.de.johni0702.minecraft.gui.element.advanced.GuiProgressBar;
 import com.replaymod.lib.de.johni0702.minecraft.gui.layout.HorizontalLayout;
@@ -35,22 +34,11 @@ import com.replaymod.replaystudio.replay.ReplayFile;
 import com.replaymod.replaystudio.util.Location;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.embedded.EmbeddedChannel;
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import net.minecraft.CrashReport;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.ReceivingLevelScreen;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
-import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
 import net.minecraft.network.PacketBundlePacker;
@@ -60,18 +48,23 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.util.*;
+
 public class ReplayHandler {
-   private static Minecraft mc = MCVer.getMinecraft();
+   private static final Minecraft mc = MCVer.getMinecraft();
    private final ReplayFile replayFile;
    private final FullReplaySender fullReplaySender;
    private final QuickReplaySender quickReplaySender;
    private boolean quickMode = false;
    private Restrictions restrictions = new Restrictions();
    private boolean suppressCameraMovements;
-   private Set<Marker> markers;
+   private final Set<Marker> markers;
    private final GuiReplayOverlay overlay;
    private EmbeddedChannel channel;
-   private int replayDuration;
+   private final int replayDuration;
    private Location targetCameraPosition;
    private UUID spectating;
 
@@ -79,13 +72,13 @@ public class ReplayHandler {
       Preconditions.checkState(mc.isSameThread(), "Must be called from Minecraft thread.");
       this.replayFile = replayFile;
       this.replayDuration = replayFile.getMetaData().getDuration();
-      this.markers = (Set)replayFile.getMarkers().or((Object)Collections.emptySet());
+      this.markers = replayFile.getMarkers().or(Collections.emptySet());
       this.fullReplaySender = new FullReplaySender(this, replayFile, false);
       this.quickReplaySender = new QuickReplaySender(ReplayModReplay.instance, replayFile);
       this.setup();
       this.overlay = new GuiReplayOverlay(this);
       this.overlay.setVisible(true);
-      ((ReplayOpenedCallback)ReplayOpenedCallback.EVENT.invoker()).replayOpened(this);
+      ReplayOpenedCallback.EVENT.invoker().replayOpened(this);
       this.fullReplaySender.setAsyncMode(asyncMode);
    }
 
@@ -100,7 +93,7 @@ public class ReplayHandler {
 
    public void endReplay() throws IOException {
       Preconditions.checkState(mc.isSameThread(), "Must be called from Minecraft thread.");
-      ((ReplayClosingCallback)ReplayClosingCallback.EVENT.invoker()).replayClosing(this);
+      ReplayClosingCallback.EVENT.invoker().replayClosing(this);
       this.fullReplaySender.terminateReplay();
       if (this.quickMode) {
          this.quickReplaySender.unregister();
@@ -120,8 +113,8 @@ public class ReplayHandler {
       timer.setTickLength(50.0F);
       this.overlay.setVisible(false);
       ReplayModReplay.instance.forcefullyStopReplay();
-      mc.setScreen((Screen)null);
-      ((ReplayClosedCallback)ReplayClosedCallback.EVENT.invoker()).replayClosed(this);
+      mc.setScreen(null);
+      ReplayClosedCallback.EVENT.invoker().replayClosed(this);
    }
 
    private void setup() {
@@ -132,7 +125,7 @@ public class ReplayHandler {
             t.printStackTrace();
          }
       };
-      networkManager.setListener(new ClientHandshakePacketListenerImpl(networkManager, mc, (ServerData)null, (Screen)null, false, (Duration)null, (it) -> {
+      networkManager.setListener(new ClientHandshakePacketListenerImpl(networkManager, mc, null, null, false, null, (it) -> {
       }));
       this.channel = new EmbeddedChannel();
       this.channel.pipeline().addLast("ReplayModReplay_quickReplaySender", this.quickReplaySender);
@@ -153,7 +146,7 @@ public class ReplayHandler {
    }
 
    public ReplaySender getReplaySender() {
-      return (ReplaySender)(this.quickMode ? this.quickReplaySender : this.fullReplaySender);
+      return this.quickMode ? this.quickReplaySender : this.fullReplaySender;
    }
 
    public GuiReplayOverlay getOverlay() {
@@ -186,7 +179,7 @@ public class ReplayHandler {
             }, Runnable::run);
          }
 
-         Futures.addCallback(future, new FutureCallback<Void>() {
+         Futures.addCallback(future, new FutureCallback<>() {
             public void onSuccess(@Nullable Void result) {
                andThen.run();
             }
@@ -248,7 +241,7 @@ public class ReplayHandler {
       if (cameraEntity != null) {
          if (e != null && e != cameraEntity) {
             if (e instanceof Player) {
-               this.spectating = ((Entity)e).getUUID();
+               this.spectating = e.getUUID();
             }
          } else {
             this.spectating = null;
@@ -262,15 +255,15 @@ public class ReplayHandler {
          }
 
          if (mc.getCameraEntity() != e) {
-            mc.setCameraEntity((Entity)e);
-            cameraEntity.setCameraPosRot((Entity)e);
+            mc.setCameraEntity(e);
+            cameraEntity.setCameraPosRot(e);
          }
 
       }
    }
 
    public void spectateCamera() {
-      this.spectateEntity((Entity)null);
+      this.spectateEntity(null);
    }
 
    public boolean isCameraView() {
@@ -325,7 +318,7 @@ public class ReplayHandler {
             FullReplaySender replaySender = this.fullReplaySender;
             if (!replaySender.isHurrying()) {
                if (targetTime < replaySender.currentTimeStamp()) {
-                  mc.setScreen((Screen)null);
+                  mc.setScreen(null);
                }
 
                if (retainCameraPosition) {
@@ -345,7 +338,7 @@ public class ReplayHandler {
                      GuiScreen guiScreen = new GuiScreen();
                      guiScreen.setBackground(AbstractGuiScreen.Background.DIRT);
                      guiScreen.setLayout(new HorizontalLayout(HorizontalLayout.Alignment.CENTER));
-                     guiScreen.addElements(new HorizontalLayout.Data(0.5D), new GuiElement[]{(new GuiLabel()).setI18nText("replaymod.gui.pleasewait", new Object[0])});
+                     guiScreen.addElements(new HorizontalLayout.Data(0.5D), (new GuiLabel()).setI18nText("replaymod.gui.pleasewait"));
                      replaySender.setSyncModeAndWait();
                      MCVer.pushMatrix();
                      RenderSystem.clear(16640, true);
@@ -403,8 +396,7 @@ public class ReplayHandler {
    }
 
    private void skipTeleportInterpolation(Entity entity) {
-      if (entity instanceof LivingEntity && !(entity instanceof CameraEntity)) {
-         LivingEntity e = (LivingEntity)entity;
+      if (entity instanceof LivingEntity e && !(entity instanceof CameraEntity)) {
          EntityLivingBaseAccessor ea = (EntityLivingBaseAccessor)e;
          e.absMoveTo(ea.getInterpTargetX(), ea.getInterpTargetY(), ea.getInterpTargetZ());
          e.setYRot((float)ea.getInterpTargetYaw());
@@ -418,7 +410,7 @@ public class ReplayHandler {
 
       public InitializingQuickModePopup(GuiContainer container) {
          super(container);
-         this.progressBar = (GuiProgressBar)((GuiProgressBar)(new GuiProgressBar(this.popup)).setSize(300, 20)).setI18nLabel("replaymod.gui.loadquickmode", new Object[0]);
+         this.progressBar = (new GuiProgressBar(this.popup)).setSize(300, 20).setI18nLabel("replaymod.gui.loadquickmode", new Object[0]);
          this.open();
       }
 
