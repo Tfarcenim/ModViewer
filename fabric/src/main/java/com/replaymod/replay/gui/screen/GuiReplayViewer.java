@@ -47,17 +47,7 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import net.minecraft.ChatFormatting;
 import net.minecraft.CrashReport;
@@ -72,22 +62,22 @@ import org.apache.commons.io.filefilter.SuffixFileFilter;
 
 public class GuiReplayViewer extends GuiScreen {
    private final ReplayModReplay mod;
-   public final GuiReplayViewer.GuiReplayList list = (GuiReplayViewer.GuiReplayList)((GuiReplayViewer.GuiReplayList)(new GuiReplayViewer.GuiReplayList(this)).onSelectionChanged(this::updateButtons)).onSelectionDoubleClicked(() -> {
+   public final GuiReplayViewer.GuiReplayList list = new GuiReplayList(this).onSelectionChanged(this::updateButtons).onSelectionDoubleClicked(() -> {
       if (this.loadButton.isEnabled()) {
          this.loadButton.onClick();
       }
 
    });
-   public final GuiButton loadButton = (GuiButton)((GuiButton)(new GuiButton()).onClick(new Runnable() {
+   public final GuiButton loadButton = new GuiButton().onClick(new Runnable() {
       private boolean loading = false;
 
       public void run() {
          if (!this.loading) {
             this.loading = true;
             GuiReplayViewer.this.loadButton.setDisabled();
-            List<GuiReplayViewer.GuiReplayEntry> selected = GuiReplayViewer.this.list.getSelected();
+            List<GuiReplayEntry> selected = GuiReplayViewer.this.list.getSelected();
             if (selected.size() == 1) {
-               File file = ((GuiReplayViewer.GuiReplayEntry)selected.get(0)).file;
+               File file = selected.get(0).file;
                ReplayModReplay.LOGGER.info("Opening replay in viewer: " + file);
 
                try {
@@ -96,9 +86,9 @@ public class GuiReplayViewer extends GuiScreen {
                   var4.printStackTrace();
                }
             } else {
-               Iterator<Pair<File, List<RenderJob>>> replays = selected.stream().filter((it) -> {
+               Iterator<Pair<File, List<RenderJob>>> replays = selected.stream().filter(it -> {
                   return !it.renderQueue.isEmpty();
-               }).map((it) -> {
+               }).map(it -> {
                   return Pair.of(it.file, it.renderQueue);
                }).iterator();
                GuiRenderQueue.processMultipleReplays(GuiReplayViewer.this, GuiReplayViewer.this.mod, replays, () -> {
@@ -110,8 +100,8 @@ public class GuiReplayViewer extends GuiScreen {
 
          }
       }
-   })).setSize(150, 20);
-   public final GuiButton folderButton = (GuiButton)((GuiButton)((GuiButton)(new GuiButton()).onClick(new Runnable() {
+   }).setSize(150, 20);
+   public final GuiButton folderButton = new GuiButton().onClick(new Runnable() {
       public void run() {
          try {
             File folder = GuiReplayViewer.this.mod.getCore().folders.getReplayFolder().toFile();
@@ -121,15 +111,15 @@ public class GuiReplayViewer extends GuiScreen {
          }
 
       }
-   })).setSize(150, 20)).setI18nLabel("replaymod.gui.viewer.replayfolder", new Object[0]);
-   public final GuiButton renameButton = (GuiButton)((GuiButton)((GuiButton)((GuiButton)(new GuiButton()).onClick(new Runnable() {
+   }).setSize(150, 20).setI18nLabel("replaymod.gui.viewer.replayfolder", new Object[0]);
+   public final GuiButton renameButton = new GuiButton().onClick(new Runnable() {
       public void run() {
-         Path path = ((GuiReplayViewer.GuiReplayEntry)GuiReplayViewer.this.list.getSelected().get(0)).file.toPath();
+         Path path = GuiReplayViewer.this.list.getSelected().get(0).file.toPath();
          String name = Utils.fileNameToReplayName(path.getFileName().toString());
-         GuiTextField nameField = (GuiTextField)((GuiTextField)((GuiTextField)(new GuiTextField()).setSize(200, 20)).setFocused(true)).setText(name);
-         GuiYesNoPopup popup = GuiYesNoPopup.open(GuiReplayViewer.this, ((GuiLabel)(new GuiLabel()).setI18nText("replaymod.gui.viewer.rename.name", new Object[0])).setColor(Colors.BLACK), nameField).setYesI18nLabel("replaymod.gui.rename").setNoI18nLabel("replaymod.gui.cancel");
+         GuiTextField nameField = new GuiTextField().setSize(200, 20).setFocused(true).setText(name);
+         GuiYesNoPopup popup = GuiYesNoPopup.open(GuiReplayViewer.this, new GuiLabel().setI18nText("replaymod.gui.viewer.rename.name", new Object[0]).setColor(Colors.BLACK), nameField).setYesI18nLabel("replaymod.gui.rename").setNoI18nLabel("replaymod.gui.cancel");
          ((VerticalLayout)popup.getInfo().getLayout()).setSpacing(7);
-         ((GuiTextField)nameField.onEnter(new Runnable(popup) {
+         nameField.onEnter(new Runnable(popup) {
             // $FF: synthetic field
             final GuiYesNoPopup val$popup;
             // $FF: synthetic field
@@ -146,8 +136,8 @@ public class GuiReplayViewer extends GuiScreen {
                }
 
             }
-         })).onTextChanged((obj) -> {
-            popup.getYesButton().setEnabled(!nameField.getText().isEmpty() && Files.notExists(Utils.replayNameToPath(path.getParent(), nameField.getText()), new LinkOption[0]));
+         }).onTextChanged(obj -> {
+            popup.getYesButton().setEnabled(!nameField.getText().isEmpty() && Files.notExists(Utils.replayNameToPath(path.getParent(), nameField.getText())));
          });
          popup.onAccept(() -> {
             String newName = nameField.getText().trim();
@@ -164,14 +154,14 @@ public class GuiReplayViewer extends GuiScreen {
             GuiReplayViewer.this.list.load();
          });
       }
-   })).setSize(73, 20)).setI18nLabel("replaymod.gui.rename", new Object[0])).setDisabled();
-   public final GuiButton deleteButton = (GuiButton)((GuiButton)((GuiButton)((GuiButton)(new GuiButton()).onClick(() -> {
+   }).setSize(73, 20).setI18nLabel("replaymod.gui.rename", new Object[0]).setDisabled();
+   public final GuiButton deleteButton = new GuiButton().onClick(() -> {
       Iterator var1 = this.list.getSelected().iterator();
 
       while(var1.hasNext()) {
-         GuiReplayViewer.GuiReplayEntry entry = (GuiReplayViewer.GuiReplayEntry)var1.next();
+         GuiReplayEntry entry = (GuiReplayEntry)var1.next();
          String name = entry.name.getText();
-         GuiYesNoPopup.open(this, ((GuiLabel)(new GuiLabel()).setI18nText("replaymod.gui.viewer.delete.linea", new Object[0])).setColor(Colors.BLACK), ((GuiLabel)(new GuiLabel()).setI18nText("replaymod.gui.viewer.delete.lineb", new Object[]{name + ChatFormatting.RESET})).setColor(Colors.BLACK)).setYesI18nLabel("replaymod.gui.delete").setNoI18nLabel("replaymod.gui.cancel").onAccept(() -> {
+         GuiYesNoPopup.open(this, new GuiLabel().setI18nText("replaymod.gui.viewer.delete.linea", new Object[0]).setColor(Colors.BLACK), new GuiLabel().setI18nText("replaymod.gui.viewer.delete.lineb", new Object[]{name + ChatFormatting.RESET}).setColor(Colors.BLACK)).setYesI18nLabel("replaymod.gui.delete").setNoI18nLabel("replaymod.gui.cancel").onAccept(() -> {
             try {
                FileUtils.forceDelete(entry.file);
             } catch (IOException var3) {
@@ -182,7 +172,7 @@ public class GuiReplayViewer extends GuiScreen {
          });
       }
 
-   })).setSize(73, 20)).setI18nLabel("replaymod.gui.delete", new Object[0])).setDisabled();
+   }).setSize(73, 20).setI18nLabel("replaymod.gui.delete", new Object[0]).setDisabled();
    public final GuiButton settingsButton;
    public final GuiButton cancelButton;
    public final List<GuiButton> replaySpecificButtons;
@@ -193,20 +183,20 @@ public class GuiReplayViewer extends GuiScreen {
    private static final GuiImage DEFAULT_THUMBNAIL;
 
    public GuiReplayViewer(ReplayModReplay mod) {
-      this.settingsButton = (GuiButton)((GuiButton)((GuiButton)((GuiButton)((GuiButton)(new GuiButton(this)).setSize(20, 20)).setTexture(ReplayMod.TEXTURE, 256)).setSpriteUV(20, 0)).setTooltip((new GuiTooltip()).setI18nText("replaymod.gui.settings", new Object[0]))).onClick(() -> {
-         (new GuiReplaySettings(this.toMinecraft(), this.getMod().getCore().getSettingsRegistry())).display();
+      this.settingsButton = new GuiButton(this).setSize(20, 20).setTexture(ReplayMod.TEXTURE, 256).setSpriteUV(20, 0).setTooltip(new GuiTooltip().setI18nText("replaymod.gui.settings")).onClick(() -> {
+         new GuiReplaySettings(this.toMinecraft(), this.getMod().getCore().getSettingsRegistry()).display();
       });
-      this.cancelButton = (GuiButton)((GuiButton)((GuiButton)(new GuiButton()).onClick(new Runnable() {
+      this.cancelButton = new GuiButton().onClick(new Runnable() {
          public void run() {
-            GuiReplayViewer.this.getMinecraft().setScreen((Screen)null);
+            GuiReplayViewer.this.getMinecraft().setScreen(null);
          }
-      })).setSize(73, 20)).setI18nLabel("replaymod.gui.cancel", new Object[0]);
+      }).setSize(73, 20).setI18nLabel("replaymod.gui.cancel", new Object[0]);
       this.replaySpecificButtons = new ArrayList();
-      this.replaySpecificButtons.addAll(Arrays.asList(this.renameButton));
+      this.replaySpecificButtons.addAll(Collections.singletonList(this.renameButton));
       this.editorButton = new GuiPanel();
-      this.upperButtonPanel = (GuiPanel)((GuiPanel)(new GuiPanel()).setLayout((new HorizontalLayout()).setSpacing(5))).addElements((LayoutData)null, new GuiElement[]{this.loadButton});
-      this.lowerButtonPanel = (GuiPanel)((GuiPanel)(new GuiPanel()).setLayout((new HorizontalLayout()).setSpacing(5))).addElements((LayoutData)null, new GuiElement[]{this.renameButton, this.deleteButton, this.editorButton, this.cancelButton});
-      this.buttonPanel = (GuiPanel)((GuiPanel)(new GuiPanel(this)).setLayout((new VerticalLayout()).setSpacing(5))).addElements((LayoutData)null, new GuiElement[]{this.upperButtonPanel, this.lowerButtonPanel});
+      this.upperButtonPanel = new GuiPanel().setLayout(new HorizontalLayout().setSpacing(5)).addElements(null, new GuiElement[]{this.loadButton});
+      this.lowerButtonPanel = new GuiPanel().setLayout(new HorizontalLayout().setSpacing(5)).addElements(null, new GuiElement[]{this.renameButton, this.deleteButton, this.editorButton, this.cancelButton});
+      this.buttonPanel = new GuiPanel(this).setLayout(new VerticalLayout().setSpacing(5)).addElements(null, new GuiElement[]{this.upperButtonPanel, this.lowerButtonPanel});
       this.mod = mod;
 
       try {
@@ -215,7 +205,7 @@ public class GuiReplayViewer extends GuiScreen {
          throw new ReportedException(CrashReport.forThrowable(var3, "Getting replay folder"));
       }
 
-      this.setTitle((GuiLabel)(new GuiLabel()).setI18nText("replaymod.gui.replayviewer", new Object[0]));
+      this.setTitle(new GuiLabel().setI18nText("replaymod.gui.replayviewer", new Object[0]));
       this.setLayout(new CustomLayout<GuiScreen>() {
          protected void layout(GuiScreen container, int width, int height) {
             this.pos(GuiReplayViewer.this.buttonPanel, width / 2 - this.width(GuiReplayViewer.this.buttonPanel) / 2, height - 10 - this.height(GuiReplayViewer.this.buttonPanel));
@@ -234,50 +224,50 @@ public class GuiReplayViewer extends GuiScreen {
    private void updateButtons() {
       List<GuiReplayViewer.GuiReplayEntry> selected = this.list.getSelected();
       int count = selected.size();
-      this.replaySpecificButtons.forEach((b) -> {
+      this.replaySpecificButtons.forEach(b -> {
          b.setEnabled(count == 1);
       });
       this.deleteButton.setEnabled(count > 0);
       if (count > 1) {
-         Set<RenderJob> jobs = (Set)selected.stream().flatMap((entry) -> {
+         Set<RenderJob> jobs = selected.stream().flatMap(entry -> {
             return entry.renderQueue.stream();
          }).collect(Collectors.toSet());
-         String[] tooltipLines = (String[])jobs.stream().map(RenderJob::getName).toArray((x$0) -> {
+         String[] tooltipLines = jobs.stream().map(RenderJob::getName).toArray(x$0 -> {
             return new String[x$0];
          });
-         this.loadButton.setI18nLabel("replaymod.gui.viewer.bulkrender", new Object[]{jobs.size()});
-         this.loadButton.setTooltip((new GuiTooltip()).setText(tooltipLines));
+         this.loadButton.setI18nLabel("replaymod.gui.viewer.bulkrender", jobs.size());
+         this.loadButton.setTooltip(new GuiTooltip().setText(tooltipLines));
          this.loadButton.setEnabled(!jobs.isEmpty());
          String[] compatError = VideoRenderer.checkCompat(jobs.stream().map(RenderJob::getSettings));
          if (compatError != null) {
-            ((GuiButton)this.loadButton.setDisabled()).setTooltip((new GuiTooltip()).setText(compatError));
+            this.loadButton.setDisabled().setTooltip(new GuiTooltip().setText(compatError));
          }
       } else {
-         this.loadButton.setI18nLabel("replaymod.gui.load", new Object[0]);
-         this.loadButton.setTooltip((GuiElement)null);
-         this.loadButton.setEnabled(count == 1 && !((GuiReplayViewer.GuiReplayEntry)selected.get(0)).incompatible);
+         this.loadButton.setI18nLabel("replaymod.gui.load");
+         this.loadButton.setTooltip(null);
+         this.loadButton.setEnabled(count == 1 && !selected.get(0).incompatible);
       }
 
    }
 
    static {
-      DEFAULT_THUMBNAIL = (GuiImage)(new GuiImage()).setTexture(Utils.DEFAULT_THUMBNAIL);
+      DEFAULT_THUMBNAIL = new GuiImage().setTexture(Utils.DEFAULT_THUMBNAIL);
    }
 
    public static class GuiReplayList extends AbstractGuiResourceLoadingList<GuiReplayViewer.GuiReplayList, GuiReplayViewer.GuiReplayEntry> implements Typeable {
       private File folder = null;
-      private final GuiTextField filterTextField = (GuiTextField)(new GuiTextField()).setFocused(true);
+      private final GuiTextField filterTextField = new GuiTextField().setFocused(true);
 
       public GuiReplayList(GuiContainer container) {
          super(container);
-         ((GuiReplayViewer.GuiReplayList)((GuiReplayViewer.GuiReplayList)this.onLoad((results) -> {
+         this.onLoad(results -> {
             File[] files = this.folder.listFiles(new SuffixFileFilter(".mcpr", IOCase.INSENSITIVE));
             if (files == null) {
                ReplayModReplay.LOGGER.warn("Failed to list files in {}", this.folder);
             } else {
                Map<File, Long> lastModified = new HashMap();
-               Arrays.sort(files, Comparator.comparingLong((f) -> {
-                  return (Long)lastModified.computeIfAbsent(f, File::lastModified);
+               Arrays.sort(files, Comparator.comparingLong(f -> {
+                  return lastModified.computeIfAbsent(f, File::lastModified);
                }).reversed());
                File[] var4 = files;
                int var5 = files.length;
@@ -292,7 +282,7 @@ public class GuiReplayViewer extends GuiScreen {
                      ReplayFile replayFile = ReplayMod.instance.files.open(file.toPath());
 
                      try {
-                        Image thumb = (Image)Optional.ofNullable((InputStream)replayFile.getThumbBytes().orNull()).flatMap((stream) -> {
+                        Image thumb = (Image)Optional.ofNullable(replayFile.getThumbBytes().orNull()).flatMap(stream -> {
                            try {
                               InputStream in = stream;
 
@@ -320,14 +310,14 @@ public class GuiReplayViewer extends GuiScreen {
                               var6.printStackTrace();
                               return Optional.empty();
                            }
-                        }).orElse((Object)null);
+                        }).orElse(null);
                         ReplayMetaData metaData = replayFile.getMetaData();
                         List<RenderJob> renderQueue = RenderJob.readQueue(replayFile);
                         if (metaData != null) {
                            results.consume(() -> {
-                              return new GuiReplayViewer.GuiReplayEntry(file, metaData, thumb, renderQueue) {
+                              return new GuiReplayEntry(file, metaData, thumb, renderQueue) {
                                  // $FF: synthetic field
-                                 final GuiReplayViewer.GuiReplayList this$0;
+                                 final GuiReplayList this$0;
 
                                  {
                                     super(file, metaData, thumbImage, renderQueue);
@@ -335,7 +325,7 @@ public class GuiReplayViewer extends GuiScreen {
                                  }
 
                                  public ReadableDimension calcMinSize() {
-                                    return (ReadableDimension)(this.this$0.isFiltered(this) ? new Dimension(-4, -4) : super.calcMinSize());
+                                    return this.this$0.isFiltered(this) ? new Dimension(-4, -4) : super.calcMinSize();
                                  }
                               };
                            });
@@ -361,7 +351,7 @@ public class GuiReplayViewer extends GuiScreen {
                }
 
             }
-         })).setDrawShadow(true)).setDrawSlider(true);
+         }).setDrawShadow(true).setDrawSlider(true);
       }
 
       public void setFolder(File folder) {
@@ -435,14 +425,14 @@ public class GuiReplayViewer extends GuiScreen {
       private final List<RenderJob> renderQueue;
 
       public GuiReplayEntry(File file, ReplayMetaData metaData, Image thumbImage, List<RenderJob> renderQueue) {
-         this.server = (GuiLabel)(new GuiLabel()).setColor(Colors.LIGHT_GRAY);
-         this.date = (GuiLabel)(new GuiLabel()).setColor(Colors.LIGHT_GRAY);
-         this.infoPanel = (GuiPanel)((GuiPanel)(new GuiPanel(this)).setLayout((new VerticalLayout()).setSpacing(2))).addElements((LayoutData)null, new GuiElement[]{this.name, this.server, this.date});
-         this.version = (GuiLabel)(new GuiLabel(this)).setColor(Colors.RED);
+         this.server = new GuiLabel().setColor(Colors.LIGHT_GRAY);
+         this.date = new GuiLabel().setColor(Colors.LIGHT_GRAY);
+         this.infoPanel = new GuiPanel(this).setLayout(new VerticalLayout().setSpacing(2)).addElements(null, new GuiElement[]{this.name, this.server, this.date});
+         this.version = new GuiLabel(this).setColor(Colors.RED);
          this.duration = new GuiLabel();
-         this.durationPanel = (GuiPanel)((GuiPanel)((GuiPanel)(new GuiPanel()).setBackgroundColor(Colors.HALF_TRANSPARENT)).addElements((LayoutData)null, new GuiElement[]{this.duration})).setLayout(new CustomLayout<GuiPanel>() {
+         this.durationPanel = new GuiPanel().setBackgroundColor(Colors.HALF_TRANSPARENT).addElements(null, new GuiElement[]{this.duration}).setLayout(new CustomLayout<GuiPanel>() {
             // $FF: synthetic field
-            final GuiReplayViewer.GuiReplayEntry this$0;
+            final GuiReplayEntry this$0;
 
             {
                this.this$0 = this$0;
@@ -457,17 +447,17 @@ public class GuiReplayViewer extends GuiScreen {
                return new Dimension(dimension.getWidth() + 2, dimension.getHeight() + 2);
             }
          });
-         this.renderQueueIcon = (GuiImage)((GuiImage)(new GuiImage()).setSize(10, 10)).setTexture(ReplayMod.TEXTURE, 40, 0, 20, 20);
+         this.renderQueueIcon = new GuiImage().setSize(10, 10).setTexture(ReplayMod.TEXTURE, 40, 0, 20, 20);
          this.file = file;
          this.renderQueue = renderQueue;
          ChatFormatting var10001 = ChatFormatting.UNDERLINE;
          this.name.setText(var10001 + Utils.fileNameToReplayName(file.getName()));
          if (!StringUtils.isEmpty(metaData.getCustomServerName())) {
             this.server.setText(metaData.getCustomServerName());
-         } else if (!StringUtils.isEmpty(metaData.getServerName()) && (Boolean)ReplayMod.instance.getSettingsRegistry().get(Setting.SHOW_SERVER_IPS)) {
+         } else if (!StringUtils.isEmpty(metaData.getServerName()) && ReplayMod.instance.getSettingsRegistry().get(Setting.SHOW_SERVER_IPS)) {
             this.server.setText(metaData.getServerName());
          } else {
-            ((GuiLabel)this.server.setI18nText("replaymod.gui.iphidden", new Object[0])).setColor(Colors.DARK_RED);
+            this.server.setI18nText("replaymod.gui.iphidden", new Object[0]).setColor(Colors.DARK_RED);
          }
 
          this.incompatible = !ReplayMod.isCompatible(metaData.getFileFormatVersion(), metaData.getRawProtocolVersionOr0());
@@ -476,21 +466,19 @@ public class GuiReplayViewer extends GuiScreen {
          }
 
          this.dateMillis = metaData.getDate();
-         this.date.setText((new SimpleDateFormat()).format(new Date(this.dateMillis)));
+         this.date.setText(new SimpleDateFormat().format(new Date(this.dateMillis)));
          if (thumbImage == null) {
-            this.thumbnail = (GuiImage)(new GuiImage(GuiReplayViewer.DEFAULT_THUMBNAIL)).setSize(53, 30);
-            this.addElements((LayoutData)null, new GuiElement[]{this.thumbnail});
+            this.thumbnail = new GuiImage(GuiReplayViewer.DEFAULT_THUMBNAIL).setSize(53, 30);
+            this.addElements(null, this.thumbnail);
          } else {
-            this.thumbnail = (GuiImage)((GuiImage)(new GuiImage(this)).setTexture(thumbImage)).setSize(53, 30);
+            this.thumbnail = new GuiImage(this).setTexture(thumbImage).setSize(53, 30);
          }
 
          this.duration.setText(Utils.convertSecondsToShortString(metaData.getDuration() / 1000));
-         this.addElements((LayoutData)null, new GuiElement[]{this.durationPanel});
+         this.addElements(null, this.durationPanel);
          if (!renderQueue.isEmpty()) {
-            this.renderQueueIcon.setTooltip((new GuiTooltip()).setText((String[])renderQueue.stream().map(RenderJob::getName).toArray((x$0) -> {
-               return new String[x$0];
-            })));
-            this.addElements((LayoutData)null, new GuiElement[]{this.renderQueueIcon});
+            this.renderQueueIcon.setTooltip(new GuiTooltip().setText(renderQueue.stream().map(RenderJob::getName).toArray(String[]::new)));
+            this.addElements(null, this.renderQueueIcon);
          }
 
          this.setLayout(new CustomLayout<GuiReplayViewer.GuiReplayEntry>() {
@@ -544,21 +532,21 @@ public class GuiReplayViewer extends GuiScreen {
       public GuiSelectReplayPopup(GuiContainer container, File folder) {
          super(container);
          this.list = new GuiReplayViewer.GuiReplayList(this.popup);
-         this.acceptButton = (GuiButton)((GuiButton)((GuiButton)(new GuiButton(this.popup)).setI18nLabel("gui.done", new Object[0])).setSize(50, 20)).setDisabled();
-         this.cancelButton = (GuiButton)((GuiButton)(new GuiButton(this.popup)).setI18nLabel("gui.cancel", new Object[0])).setSize(50, 20);
+         this.acceptButton = new GuiButton(this.popup).setI18nLabel("gui.done", new Object[0]).setSize(50, 20).setDisabled();
+         this.cancelButton = new GuiButton(this.popup).setI18nLabel("gui.cancel", new Object[0]).setSize(50, 20);
          this.list.setFolder(folder);
-         ((GuiReplayViewer.GuiReplayList)this.list.onSelectionChanged(() -> {
+         this.list.onSelectionChanged(() -> {
             this.acceptButton.setEnabled(this.list.getSelected() != null);
-         })).onSelectionDoubleClicked(() -> {
+         }).onSelectionDoubleClicked(() -> {
             this.close();
-            this.future.set(((GuiReplayViewer.GuiReplayEntry)this.list.getSelected().get(0)).file);
+            this.future.set(this.list.getSelected().get(0).file);
          });
          this.acceptButton.onClick(() -> {
-            this.future.set(((GuiReplayViewer.GuiReplayEntry)this.list.getSelected().get(0)).file);
+            this.future.set(this.list.getSelected().get(0).file);
             this.close();
          });
          this.cancelButton.onClick(() -> {
-            this.future.set((Object)null);
+            this.future.set(null);
             this.close();
          });
          this.popup.setLayout(new CustomLayout<GuiPanel>() {

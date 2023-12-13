@@ -13,7 +13,7 @@ public class ReplayModBackend implements ClientModInitializer {
    }
 
    public String getVersion() {
-      return ((ModContainer)FabricLoader.getInstance().getModContainer("replaymod").orElseThrow(IllegalStateException::new)).getMetadata().getVersion().toString();
+      return FabricLoader.getInstance().getModContainer("replaymod").orElseThrow(IllegalStateException::new).getMetadata().getVersion().toString();
    }
 
    public String getMinecraftVersion() {

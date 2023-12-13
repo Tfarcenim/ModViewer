@@ -56,7 +56,7 @@ public class ReplayMod implements Module, Scheduler {
    public ReplayMod(ReplayModBackend backend) {
       this.settingsRegistry.register(Setting.class);
       instance = this;
-      this.modules = new ArrayList();
+      this.modules = new ArrayList<>();
       this.backgroundProcesses = new GuiBackgroundProcesses();
       this.folders = new ReplayFoldersService(this.settingsRegistry);
       this.files = new ReplayFilesService(this.folders);
@@ -101,9 +101,7 @@ public class ReplayMod implements Module, Scheduler {
          }
 
          public IoSupplier<InputStream> getRootResource(String... segments) {
-            return segments.length == 1 && segments[0].equals("pack.mcmeta") ? () -> {
-               return new ByteArrayInputStream(this.generatePackMeta());
-            } : super.getRootResource(segments);
+            return segments.length == 1 && segments[0].equals("pack.mcmeta") ? () -> new ByteArrayInputStream(this.generatePackMeta()) : super.getRootResource(segments);
          }
 
          private byte[] generatePackMeta() {
@@ -123,7 +121,7 @@ public class ReplayMod implements Module, Scheduler {
 
    public void registerKeyBindings(KeyBindingRegistry registry) {
       registry.registerKeyBinding("replaymod.input.settings", 0, () -> {
-         (new GuiReplaySettings((Screen)null, this.settingsRegistry)).display();
+         new GuiReplaySettings(null, this.settingsRegistry).display();
       }, false);
    }
 
@@ -180,7 +178,7 @@ public class ReplayMod implements Module, Scheduler {
    }
 
    private void printToChat(boolean warning, String message, Object... args) {
-      if ((Boolean)this.getSettingsRegistry().get(Setting.NOTIFICATIONS)) {
+      if (this.getSettingsRegistry().get(Setting.NOTIFICATIONS)) {
          Style coloredDarkGray = Style.EMPTY.withColor(ChatFormatting.DARK_GRAY);
          Style coloredGold = Style.EMPTY.withColor(ChatFormatting.GOLD);
          Style alert = Style.EMPTY.withColor(warning ? ChatFormatting.RED : ChatFormatting.DARK_GREEN);

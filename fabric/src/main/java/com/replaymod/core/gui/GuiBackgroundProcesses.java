@@ -9,7 +9,6 @@ import com.replaymod.lib.de.johni0702.minecraft.gui.container.GuiScreen;
 import com.replaymod.lib.de.johni0702.minecraft.gui.container.VanillaGuiScreen;
 import com.replaymod.lib.de.johni0702.minecraft.gui.element.GuiElement;
 import com.replaymod.lib.de.johni0702.minecraft.gui.layout.CustomLayout;
-import com.replaymod.lib.de.johni0702.minecraft.gui.layout.LayoutData;
 import com.replaymod.lib.de.johni0702.minecraft.gui.layout.VerticalLayout;
 import com.replaymod.lib.de.johni0702.minecraft.gui.utils.EventRegistrations;
 import com.replaymod.lib.de.johni0702.minecraft.gui.utils.lwjgl.Dimension;
@@ -19,13 +18,11 @@ import java.util.Iterator;
 import net.minecraft.client.gui.screens.Screen;
 
 public class GuiBackgroundProcesses extends EventRegistrations {
-   private GuiPanel panel = (GuiPanel)(new GuiPanel()).setLayout((new VerticalLayout()).setSpacing(10));
+   private final GuiPanel panel = new GuiPanel().setLayout(new VerticalLayout().setSpacing(10));
    private boolean reentrant;
 
    public GuiBackgroundProcesses() {
-      this.on(InitScreenCallback.EVENT, (screen, buttons) -> {
-         this.onGuiInit(screen);
-      });
+      this.on(InitScreenCallback.EVENT, (screen, buttons) -> this.onGuiInit(screen));
    }
 
    private void onGuiInit(Screen guiScreen) {
@@ -39,21 +36,21 @@ public class GuiBackgroundProcesses extends EventRegistrations {
                this.reentrant = false;
             }
 
-            ((GuiScreen)vanillaGui.setLayout(new CustomLayout<GuiScreen>(vanillaGui.getLayout()) {
+            vanillaGui.setLayout(new CustomLayout<GuiScreen>(vanillaGui.getLayout()) {
                protected void layout(GuiScreen container, int width, int height) {
                   this.pos(GuiBackgroundProcesses.this.panel, width - 5 - this.width(GuiBackgroundProcesses.this.panel), 5);
                }
-            })).addElements((LayoutData)null, new GuiElement[]{this.panel});
+            }).addElements(null, this.panel);
          }
       }
    }
 
    public void addProcess(GuiElement<?> element) {
-      this.panel.addElements(new VerticalLayout.Data(1.0D), new GuiElement[]{new GuiBackgroundProcesses.Element(element)});
+      this.panel.addElements(new VerticalLayout.Data(1.0D), new Element(element));
    }
 
    public void removeProcess(GuiElement<?> element) {
-      Iterator var2 = this.panel.getChildren().iterator();
+      Iterator<GuiElement> var2 = this.panel.getChildren().iterator();
 
       GuiElement child;
       do {
@@ -61,18 +58,18 @@ public class GuiBackgroundProcesses extends EventRegistrations {
             return;
          }
 
-         child = (GuiElement)var2.next();
+         child = var2.next();
       } while(((GuiBackgroundProcesses.Element)child).inner != element);
 
       this.panel.removeElement(child);
    }
 
    private static class Element extends AbstractGuiContainer<GuiBackgroundProcesses.Element> {
-      private GuiElement inner;
+      private final GuiElement inner;
 
       Element(GuiElement inner) {
          this.inner = inner;
-         this.addElements((LayoutData)null, new GuiElement[]{inner});
+         this.addElements(null, inner);
          this.setLayout(new CustomLayout<GuiBackgroundProcesses.Element>(inner) {
             // $FF: synthetic field
             final GuiElement val$inner;
