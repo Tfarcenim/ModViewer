@@ -30,9 +30,7 @@ public class EntityRendererHandler extends EventRegistrations implements WorldRe
       this.settings = settings;
       this.renderInfo = renderInfo;
       this.startTime = Util.getNanos();
-      this.on(PreRenderHandCallback.EVENT, () -> {
-         return this.omnidirectional;
-      });
+      this.on(PreRenderHandCallback.EVENT, () -> this.omnidirectional);
       ((EntityRendererHandler.IEntityRenderer)this.mc.gameRenderer).replayModRender_setHandler(this);
       this.register();
    }
@@ -40,8 +38,8 @@ public class EntityRendererHandler extends EventRegistrations implements WorldRe
    public void renderWorld(float partialTicks, CaptureData data) {
       this.data = data;
       long offsetMillis;
-      if ((Boolean)ReplayMod.instance.getSettingsRegistry().get(Setting.FRAME_TIME_FROM_WORLD_TIME)) {
-         offsetMillis = (long)ReplayModReplay.instance.getReplayHandler().getReplaySender().currentTimeStamp();
+      if (ReplayMod.instance.getSettingsRegistry().get(Setting.FRAME_TIME_FROM_WORLD_TIME)) {
+         offsetMillis = ReplayModReplay.instance.getReplayHandler().getReplaySender().currentTimeStamp();
       } else {
          offsetMillis = (long)this.renderInfo.getFramesDone() * 1000L / (long)this.settings.getFramesPerSecond();
       }
@@ -51,7 +49,7 @@ public class EntityRendererHandler extends EventRegistrations implements WorldRe
    }
 
    public void renderWorld(float partialTicks, long finishTimeNano) {
-      ((PreRenderCallback)PreRenderCallback.EVENT.invoker()).preRender();
+      PreRenderCallback.EVENT.invoker().preRender();
       if (this.mc.level != null && this.mc.player != null) {
          GameRendererAccessor gameRenderer = (GameRendererAccessor)this.mc.gameRenderer;
          Screen orgScreen = this.mc.screen;
@@ -73,11 +71,11 @@ public class EntityRendererHandler extends EventRegistrations implements WorldRe
          }
       }
 
-      ((PostRenderCallback)PostRenderCallback.EVENT.invoker()).postRender();
+      PostRenderCallback.EVENT.invoker().postRender();
    }
 
    public void close() throws IOException {
-      ((EntityRendererHandler.IEntityRenderer)this.mc.gameRenderer).replayModRender_setHandler((EntityRendererHandler)null);
+      ((EntityRendererHandler.IEntityRenderer)this.mc.gameRenderer).replayModRender_setHandler(null);
       this.unregister();
    }
 

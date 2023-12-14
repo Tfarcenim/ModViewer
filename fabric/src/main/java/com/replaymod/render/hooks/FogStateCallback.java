@@ -4,16 +4,12 @@ import com.replaymod.lib.de.johni0702.minecraft.gui.utils.Event;
 import java.util.Iterator;
 
 public interface FogStateCallback {
-   Event<FogStateCallback> EVENT = Event.create((listeners) -> {
-      return (enabled) -> {
-         Iterator var2 = listeners.iterator();
+   Event<FogStateCallback> EVENT = Event.create((listeners) -> (enabled) -> {
 
-         while(var2.hasNext()) {
-            FogStateCallback listener = (FogStateCallback)var2.next();
-            listener.fogStateChanged(enabled);
-         }
+      for (FogStateCallback listener : listeners) {
+         listener.fogStateChanged(enabled);
+      }
 
-      };
    });
 
    void fogStateChanged(boolean var1);
